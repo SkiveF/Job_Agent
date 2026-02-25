@@ -7,28 +7,29 @@ recherche:
   # Mots-clés pour la recherche (OR logic)
   mots_cles:
     - "data engineer"
-    - "développeur python"
     - "ingénieur data"
-    - "backend developer"
+    - "data ingénieur"
 
   # Mots-clés à exclure
   mots_cles_exclus:
     - "stage"
+    - "stagiaire"
     - "alternance"
+    - "alternant"
     - "intern"
+    - "internship"
+    - "apprenti"
 
   # Localisation
   localisation:
     villes:
-      - "Paris"
-      - "Lyon"
-      - "Remote"
+      - "Île-de-France"
     rayon_km: 30  # Rayon autour de la ville
 
   # Type de contrat
   type_contrat:
     - "CDI"
-    - "CDD"
+    # - "CDD"
     # - "Freelance"
 
   # Télétravail
@@ -38,7 +39,7 @@ recherche:
 
   # Salaire
   salaire:
-    minimum: 40000  # Salaire annuel brut minimum
+    minimum: 50000  # Salaire annuel brut minimum
     devise: "EUR"
 
   # Expérience
@@ -52,8 +53,16 @@ recherche:
     - "PME"
     - "grande_entreprise"
 
+  # Type d'entreprise : ESN/service vs client final
+  # preference: "direct" (client final), "esn" (société de service), "tous" (pas de filtre)
+  # eliminatoire: true → exclut complètement le type non souhaité
+  #               false → juste un bonus/malus de ±5 points au score
+  type_entreprise:
+    preference: "direct"       # Préférer les clients finaux
+    eliminatoire: true        # false = garde les ESN mais avec un malus
+
   # Date de publication max (en jours)
-  anciennete_max_jours: 14
+  anciennete_max_jours: 5
 
 # Sites à scraper
 sites:

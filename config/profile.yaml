@@ -4,21 +4,21 @@
 # ============================================
 
 identite:
-  prenom: "Ton Prénom"
-  nom: "Ton Nom"
-  email: "ton.email@example.com"
-  telephone: "+33 6 XX XX XX XX"
+  prenom: "Skive"
+  nom: "Fameux"
+  email: "skivefameux1@gmail.com"
+  telephone: "+33 6 51 56 32 27"
   ville: "Paris"
   pays: "France"
 
 liens:
-  linkedin: "https://linkedin.com/in/ton-profil"
+  linkedin: "https://www.linkedin.com/in/skive-fameux-38bbb2173/"
   github: "https://github.com/SkiveF"
   portfolio: ""  # Optionnel
 
 cv:
   # Chemin vers ton CV en PDF
-  fichier_pdf: "./cv/mon_cv.pdf"
+  fichier_pdf: "./cv/Skive_FAMEUX_CV_.pdf"
 
 experience:
   annees: 3  # Nombre d'années d'expérience
@@ -28,26 +28,58 @@ competences:
   langages:
     - "Python"
     - "SQL"
-    - "JavaScript"
+    - "Scala"
+    - "Shell / Bash"
   frameworks:
     - "FastAPI"
     - "Django"
-    - "Spark"
-  outils:
-    - "Docker"
-    - "Git"
+    - "Django REST Framework"
+    - "Flask"
+    - "Symfony"
+    - "Apache Spark (PySpark + Scala)"
+    - "dbt"
+  bases_de_donnees:
     - "PostgreSQL"
+    - "Snowflake"
+    - "MongoDB"
+    - "SQLite"
+    - "MySQL"
+  cloud_devops:
+    - "Docker"
+    - "Docker Compose"
+    - "GitHub Actions (CI/CD)"
+    - "Git"
     - "AWS"
+    - "Airflow"
+    - "Gunicorn"
+    - "Uvicorn"
+  data_tools:
+    - "Pandas"
+    - "PySpark"
+    - "dbt"
+    - "Jupyter Notebook"
+    - "ETL Pipelines"
+    - "openpyxl"
+  scraping_automation:
+    - "Playwright"
+    - "BeautifulSoup"
+    - "Selenium"
+    - "Requests / HTTPX"
+  autres:
+    - "Data Engineering"
+    - "ETL"
+    - "REST API Development"
+    - "Web Scraping"
   langues:
     - langue: "Français"
       niveau: "natif"
     - langue: "Anglais"
-      niveau: "courant"
+      niveau: "professionnel"
 
 # Réponses pré-remplies pour les formulaires de candidature
 reponses_formulaire:
-  disponibilite: "Immédiate"
-  pretention_salariale: "45000"
+  disponibilite: "dans 3 mois"
+  pretention_salariale: "60 000 EUR brut annuel"
   droit_de_travail: true
   permis_conduire: true
   mobilite: "Île-de-France"

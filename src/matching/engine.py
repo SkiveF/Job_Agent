@@ -12,9 +12,29 @@ from src.models import (
     JobOffer,
     Application,
     ApplicationStatus,
+    CompanyType,
     ContractType,
     RemoteType,
 )
+from src.matching.esn_detector import detect_company_type, get_company_type_label
+
+
+# Villes et communes d'Île-de-France (pour matching localisation)
+IDF_KEYWORDS = [
+    "paris", "île-de-france", "ile-de-france", "idf",
+    "la défense", "la defense", "courbevoie", "puteaux", "nanterre",
+    "boulogne", "issy", "levallois", "neuilly", "clichy",
+    "montreuil", "saint-denis", "vincennes", "ivry", "vitry",
+    "créteil", "creteil", "versailles", "massy", "évry", "evry",
+    "noisy", "fontenay", "malakoff", "montrouge", "gentilly",
+    "arcueil", "cachan", "charenton", "saint-ouen", "pantin",
+    "aubervilliers", "bobigny", "rueil", "suresnes", "clamart",
+    "chatillon", "vanves", "colombes", "asnières", "asnieres",
+    "gennevilliers", "argenteuil", "sartrouville", "poissy",
+    "saint-germain", "rambouillet", "meaux", "melun", "fontainebleau",
+    "cergy", "pontoise", "bezons", "clayes-sous-bois",
+    "bois-colombes", "vélizy", "velizy",
+]
 
 
 class MatchingEngine:
@@ -36,16 +56,24 @@ class MatchingEngine:
         self._max_experience = self.criteria.get("experience", {}).get("maximum", 99)
         self._max_age_days = self.criteria.get("anciennete_max_jours", 30)
 
+        # Préférence ESN / Direct
+        type_entreprise = self.criteria.get("type_entreprise", {})
+        self._company_pref = type_entreprise.get("preference", "tous").lower()  # "esn", "direct", "tous"
+        self._esn_eliminatory = type_entreprise.get("eliminatoire", False)  # Si True, exclut les ESN (ou direct)
+
     def evaluate(self, offer: JobOffer) -> Application:
         """Évalue une offre et retourne une Application avec un score."""
         score = 0.0
         details = {}
 
-        # ── 1. Mots-clés exclus (éliminatoire) ───────────────────
+        # ── 0. Texte complet pour analyse ─────────────────────
         text = f"{offer.title} {offer.description}".lower()
+        url_lower = offer.url.lower()
+
+        # ── 1. Mots-clés exclus (ÉLIMINATOIRE) ───────────────────
+        # Vérifier dans le titre, la description ET l'URL
         for excl in self._excluded:
-            if excl in text:
-                details["excluded_keyword"] = excl
+            if excl in text or excl in url_lower:
                 return Application(
                     job=offer,
                     status=ApplicationStatus.REJECTED,
@@ -53,8 +81,34 @@ class MatchingEngine:
                     match_details={"raison": f"Mot-clé exclu: '{excl}'"},
                 )
 
-        # ── 2. Mots-clés recherchés (0-30 pts) ───────────────────
-        matched_kw = [kw for kw in self._keywords if kw in text]
+        # ── 2. Pertinence du titre (ÉLIMINATOIRE) ────────────────
+        # Le titre ou l'URL doit contenir au moins un mot-clé
+        title_lower = offer.title.lower()
+        title_relevant = any(kw in title_lower or kw in url_lower for kw in self._keywords)
+        if not title_relevant:
+            return Application(
+                job=offer,
+                status=ApplicationStatus.REJECTED,
+                match_score=0,
+                match_details={"raison": f"Titre non pertinent: '{offer.title}'"},
+            )
+
+        # ── 3. Localisation (ÉLIMINATOIRE) ────────────────────────
+        # L'offre DOIT être en Île-de-France
+        loc_lower = offer.location.lower()
+        # Vérifier aussi dans l'URL (souvent la ville est dans l'URL WTTJ)
+        loc_text = f"{loc_lower} {url_lower}"
+        loc_match = any(city in loc_text for city in IDF_KEYWORDS)
+        if not loc_match:
+            return Application(
+                job=offer,
+                status=ApplicationStatus.REJECTED,
+                match_score=0,
+                match_details={"raison": f"Hors Île-de-France: '{offer.location}'"},
+            )
+
+        # ── 4. Mots-clés recherchés (0-30 pts) ───────────────────
+        matched_kw = [kw for kw in self._keywords if kw in text or kw in url_lower]
         kw_score = min(30, (len(matched_kw) / max(len(self._keywords), 1)) * 30)
         score += kw_score
         details["keywords"] = {
@@ -62,16 +116,12 @@ class MatchingEngine:
             "score": round(kw_score, 1),
         }
 
-        # ── 3. Localisation (0-20 pts) ────────────────────────────
-        loc_lower = offer.location.lower()
-        loc_match = any(city in loc_lower for city in self._cities)
-        if "remote" in loc_lower or "télétravail" in loc_lower:
-            loc_match = True
-        loc_score = 20 if loc_match else 0
+        # ── 5. Localisation (0-20 pts) ────────────────────────────
+        loc_score = 20  # Déjà validé comme IDF ci-dessus
         score += loc_score
         details["location"] = {
             "offer": offer.location,
-            "match": loc_match,
+            "match": True,
             "score": loc_score,
         }
 
@@ -148,6 +198,50 @@ class MatchingEngine:
             "max_days": self._max_age_days,
             "match": date_ok,
             "score": date_score,
+        }
+
+        # ── 9. Type d'entreprise ESN/Direct ──────────────────────
+        company_type = detect_company_type(offer.company, offer.description)
+        offer.company_type = company_type
+        type_label = get_company_type_label(company_type)
+
+        # Filtrage éliminatoire si configuré
+        if self._esn_eliminatory and self._company_pref != "tous":
+            if self._company_pref == "direct" and company_type == CompanyType.ESN:
+                return Application(
+                    job=offer,
+                    status=ApplicationStatus.REJECTED,
+                    match_score=0,
+                    match_details={"raison": f"ESN exclue: '{offer.company}' ({type_label})"},
+                )
+            elif self._company_pref == "esn" and company_type == CompanyType.DIRECT:
+                return Application(
+                    job=offer,
+                    status=ApplicationStatus.REJECTED,
+                    match_score=0,
+                    match_details={"raison": f"Client final exclu: '{offer.company}' ({type_label})"},
+                )
+
+        # Bonus/malus selon la préférence (ajuste le score de ±5)
+        company_score = 0
+        if self._company_pref == "direct":
+            if company_type == CompanyType.DIRECT:
+                company_score = 5
+            elif company_type == CompanyType.ESN:
+                company_score = -5
+        elif self._company_pref == "esn":
+            if company_type == CompanyType.ESN:
+                company_score = 5
+            elif company_type == CompanyType.DIRECT:
+                company_score = -5
+        score += company_score
+
+        details["company_type"] = {
+            "type": company_type.value,
+            "label": type_label,
+            "preference": self._company_pref,
+            "eliminatory": self._esn_eliminatory,
+            "score": company_score,
         }
 
         # ── Résultat final ────────────────────────────────────────

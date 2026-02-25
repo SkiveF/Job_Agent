@@ -112,26 +112,53 @@ class WTTJScraper(BaseScraper):
 
         url = href if href.startswith("http") else f"https://www.welcometothejungle.com{href}"
 
-        # Titre
-        title_el = await card.query_selector(
-            "h4, span[data-testid='job-card-title'], "
-            "div[role='heading']"
-        )
-        title = (await title_el.inner_text()).strip() if title_el else "Sans titre"
+        # Titre — essayer plusieurs sélecteurs, puis fallback sur l'URL
+        title = "Sans titre"
+        for selector in [
+            "h4", "h3",
+            "span[data-testid='job-card-title']",
+            "div[role='heading']",
+            "a[href*='/jobs/'] span",
+            "a[href*='/jobs/']",
+        ]:
+            title_el = await card.query_selector(selector)
+            if title_el:
+                t = (await title_el.inner_text()).strip()
+                if t and len(t) > 3 and t != "Sans titre":
+                    title = t
+                    break
 
-        # Entreprise
-        company_el = await card.query_selector(
-            "span[data-testid='job-card-company-name'], "
-            "h3, p:first-of-type"
-        )
-        company = (await company_el.inner_text()).strip() if company_el else "Inconnu"
+        # Fallback : extraire le titre depuis l'URL
+        if title == "Sans titre" and "/jobs/" in url:
+            slug = url.split("/jobs/")[-1].split("_")[0].split("?")[0]
+            title = slug.replace("-", " ").title()
 
-        # Localisation
-        location_el = await card.query_selector(
-            "span[data-testid='job-card-location'], "
-            "span:has-text('Paris'), span:has-text('Lyon'), span:has-text('Remote')"
-        )
-        location = (await location_el.inner_text()).strip() if location_el else ""
+        # Entreprise — essayer plusieurs sélecteurs
+        company = "Inconnu"
+        for selector in [
+            "span[data-testid='job-card-company-name']",
+            "p:first-of-type",
+        ]:
+            company_el = await card.query_selector(selector)
+            if company_el:
+                c = (await company_el.inner_text()).strip()
+                if c and len(c) > 1:
+                    company = c
+                    break
+
+        # Localisation — essayer plusieurs sélecteurs
+        location = ""
+        for selector in [
+            "span[data-testid='job-card-location']",
+            "span[class*='location']",
+            "span[class*='Location']",
+        ]:
+            location_el = await card.query_selector(selector)
+            if location_el:
+                loc = (await location_el.inner_text()).strip()
+                if loc:
+                    location = loc
+                    break
 
         # Type de contrat
         contract_el = await card.query_selector(
