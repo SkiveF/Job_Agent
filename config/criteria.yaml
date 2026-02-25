@@ -1,0 +1,73 @@
+# ============================================
+# CRITÈRES DE RECHERCHE D'EMPLOI
+# Modifie ce fichier selon tes préférences
+# ============================================
+
+recherche:
+  # Mots-clés pour la recherche (OR logic)
+  mots_cles:
+    - "data engineer"
+    - "développeur python"
+    - "ingénieur data"
+    - "backend developer"
+
+  # Mots-clés à exclure
+  mots_cles_exclus:
+    - "stage"
+    - "alternance"
+    - "intern"
+
+  # Localisation
+  localisation:
+    villes:
+      - "Paris"
+      - "Lyon"
+      - "Remote"
+    rayon_km: 30  # Rayon autour de la ville
+
+  # Type de contrat
+  type_contrat:
+    - "CDI"
+    - "CDD"
+    # - "Freelance"
+
+  # Télétravail
+  remote:
+    accepte: true
+    minimum: "partiel"  # "full" | "partiel" | "aucun"
+
+  # Salaire
+  salaire:
+    minimum: 40000  # Salaire annuel brut minimum
+    devise: "EUR"
+
+  # Expérience
+  experience:
+    minimum: 0  # Années d'expérience minimum requise
+    maximum: 10  # Ne pas postuler si > X ans demandés
+
+  # Taille d'entreprise (optionnel)
+  taille_entreprise:
+    - "startup"
+    - "PME"
+    - "grande_entreprise"
+
+  # Date de publication max (en jours)
+  anciennete_max_jours: 14
+
+# Sites à scraper
+sites:
+  indeed:
+    actif: true
+    url_base: "https://fr.indeed.com"
+    max_pages: 5
+  wttj:
+    actif: true
+    url_base: "https://www.welcometothejungle.com"
+    max_pages: 5
+
+# Fréquence de scraping
+planification:
+  intervalle_heures: 6  # Scraper toutes les X heures
+  heure_debut: "08:00"
+  heure_fin: "22:00"

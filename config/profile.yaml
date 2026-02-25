@@ -1,0 +1,53 @@
+# ============================================
+# TON PROFIL - Infos pour postuler
+# Modifie ce fichier avec tes vraies informations
+# ============================================
+
+identite:
+  prenom: "Ton Prénom"
+  nom: "Ton Nom"
+  email: "ton.email@example.com"
+  telephone: "+33 6 XX XX XX XX"
+  ville: "Paris"
+  pays: "France"
+
+liens:
+  linkedin: "https://linkedin.com/in/ton-profil"
+  github: "https://github.com/SkiveF"
+  portfolio: ""  # Optionnel
+
+cv:
+  # Chemin vers ton CV en PDF
+  fichier_pdf: "./cv/mon_cv.pdf"
+
+experience:
+  annees: 3  # Nombre d'années d'expérience
+  niveau: "confirmé"  # "junior" | "confirmé" | "senior"
+
+competences:
+  langages:
+    - "Python"
+    - "SQL"
+    - "JavaScript"
+  frameworks:
+    - "FastAPI"
+    - "Django"
+    - "Spark"
+  outils:
+    - "Docker"
+    - "Git"
+    - "PostgreSQL"
+    - "AWS"
+  langues:
+    - langue: "Français"
+      niveau: "natif"
+    - langue: "Anglais"
+      niveau: "courant"
+
+# Réponses pré-remplies pour les formulaires de candidature
+reponses_formulaire:
+  disponibilite: "Immédiate"
+  pretention_salariale: "45000"
+  droit_de_travail: true
+  permis_conduire: true
+  mobilite: "Île-de-France"

@@ -1,0 +1,30 @@
+# Web scraping
+playwright
+beautifulsoup4
+lxml
+httpx
+
+# API
+fastapi
+uvicorn
+
+# Database
+sqlalchemy
+alembic
+aiosqlite
+
+# Config & Utils
+pydantic
+pydantic-settings
+pyyaml
+python-dotenv
+
+# Scheduling
+apscheduler
+
+# Logging
+loguru
+
+# Testing
+pytest
+pytest-asyncio

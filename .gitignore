@@ -1,0 +1,10 @@
+# Job Agent
+__pycache__/
+*.pyc
+*.pyo
+.env
+venv/
+*.db
+logs/
+cv/
+.pytest_cache/
