@@ -10,6 +10,7 @@ from src.models import ApplicationStatus, JobSource
 from src.scrapers.indeed import IndeedScraper
 from src.scrapers.wttj import WTTJScraper
 from src.matching.engine import MatchingEngine
+from src.matching.esn_detector import get_company_type_label
 from src.applicator.indeed import IndeedApplicator
 from src.applicator.wttj import WTTJApplicator
 from src.tracker.tracker import ApplicationTracker
@@ -76,7 +77,16 @@ class JobAgent:
         for app in matched:
             self.tracker.save_application(app)
 
-        logger.info(f"[agent] {len(matched)} offres correspondent aux critères")
+        # Compter ESN vs Direct
+        from src.models import CompanyType
+        esn_count = sum(1 for a in matched if a.job.company_type == CompanyType.ESN)
+        direct_count = sum(1 for a in matched if a.job.company_type == CompanyType.DIRECT)
+        unknown_count = sum(1 for a in matched if a.job.company_type == CompanyType.UNKNOWN)
+
+        logger.info(
+            f"[agent] {len(matched)} offres correspondent aux critères "
+            f"(🏢 ESN: {esn_count} | 🏠 Direct: {direct_count} | ❓: {unknown_count})"
+        )
         self._print_offers(matched)
 
         # ── Étape 4 : Candidature ─────────────────────────────────
@@ -155,6 +165,7 @@ class JobAgent:
                 f"\n[agent] ── Candidature {i}/{len(matched)} ──\n"
                 f"  Poste   : {job.title}\n"
                 f"  Société : {job.company}\n"
+                f"  Type    : {get_company_type_label(job.company_type)}\n"
                 f"  Lieu    : {job.location}\n"
                 f"  Score   : {app.match_score}/100\n"
                 f"  URL     : {job.url}"
@@ -178,9 +189,11 @@ class JobAgent:
 
         for i, app in enumerate(matched, 1):
             job = app.job
+            type_label = get_company_type_label(job.company_type)
             logger.info(
                 f"\n  {i}. {job.title}"
                 f"\n     {job.company} — {job.location}"
+                f"\n     {type_label}"
                 f"\n     Score: {app.match_score}/100 | {job.source.value}"
                 f"\n     {job.url}"
             )

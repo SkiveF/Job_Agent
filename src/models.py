@@ -28,6 +28,13 @@ class RemoteType(str, Enum):
     UNKNOWN = "inconnu"
 
 
+class CompanyType(str, Enum):
+    """Type d'entreprise : ESN/société de service vs client final."""
+    ESN = "esn"                    # Société de service / conseil / ESN
+    DIRECT = "direct"              # Client final / entreprise directe
+    UNKNOWN = "inconnu"            # Non déterminé
+
+
 class ApplicationStatus(str, Enum):
     NEW = "new"                    # Offre détectée, pas encore traitée
     MATCHED = "matched"            # Correspond aux critères
@@ -53,6 +60,7 @@ class JobOffer(BaseModel):
     salary_max: int | None = None
     contract_type: ContractType = ContractType.UNKNOWN
     remote: RemoteType = RemoteType.UNKNOWN
+    company_type: CompanyType = CompanyType.UNKNOWN
     experience_required: int | None = None  # Années
     date_posted: datetime | None = None
     date_scraped: datetime = Field(default_factory=datetime.now)
